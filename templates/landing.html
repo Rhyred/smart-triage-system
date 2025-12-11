@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Triage System - Tim Error 404</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Inter', 'sans-serif'],
+              display: ['Space Grotesk', 'sans-serif'],
+            },
+            colors: {
+                primary: '#06b6d4', // Cyan 500
+                secondary: '#4f46e5', // Indigo 600
+            }
+          }
+        }
+      }
+    </script>
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;500;700&family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    
+    <!-- AOS Animation -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        
+        .glass-nav {
+            background: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        
+        .glass-card {
+            background: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .glass-card:hover {
+            background: rgba(30, 41, 59, 0.6);
+            border-color: rgba(6, 182, 212, 0.3);
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px -10px rgba(6, 182, 212, 0.2);
+        }
+
+        .text-gradient {
+            background: linear-gradient(to right, #22d3ee, #818cf8);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-200 antialiased overflow-x-hidden selection:bg-cyan-500/30 selection:text-cyan-200">
+
+    <!-- Background FX -->
+    <div class="fixed inset-0 bg-[radial-gradient(circle_at_top,_var(--tw-gradient-stops))] from-indigo-950/40 via-slate-950 to-black z-0 pointer-events-none"></div>
+    <div class="fixed inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 z-0 pointer-events-none brightness-100 contrast-150"></div>
+
+    <!-- Navbar -->
+    <nav class="fixed top-0 w-full z-50 glass-nav">
+        <div class="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="bg-gradient-to-br from-cyan-500 to-indigo-600 p-2 rounded-lg">
+                    <i data-lucide="cpu" class="w-5 h-5 text-white"></i>
+                </div>
+                <span class="font-display font-bold text-xl text-white tracking-tight">Smart Triage</span>
+            </div>
+            
+            <div class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-400">
+                <a href="#home" class="hover:text-cyan-400 transition-colors">Home</a>
+                <a href="#about" class="hover:text-cyan-400 transition-colors">Tentang</a>
+                <a href="#features" class="hover:text-cyan-400 transition-colors">Fitur</a>
+                <a href="#team" class="hover:text-cyan-400 transition-colors">Tim Kami</a>
+            </div>
+
+            <a href="/dashboard" class="px-5 py-2.5 bg-cyan-600 hover:bg-cyan-500 text-white text-sm font-bold rounded-full transition-all shadow-[0_0_15px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] flex items-center gap-2">
+                <span>Buka Demo</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="relative pt-32 pb-20 md:pt-48 md:pb-32 px-6 max-w-7xl mx-auto flex flex-col items-center text-center z-10">
+        <div data-aos="fade-down" class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/50 border border-slate-700 text-xs font-medium text-cyan-400 mb-8">
+            <span class="relative flex h-2 w-2">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-cyan-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2 w-2 bg-cyan-500"></span>
+            </span>
+            Project Akhir • Error 404
+        </div>
+        
+        <h1 data-aos="fade-up" data-aos-delay="100" class="font-display text-5xl md:text-7xl font-bold leading-tight mb-6 text-white max-w-4xl">
+            Skrining Kesehatan <br>
+            <span class="text-gradient">Otomatis & Tanpa Kontak</span>
+        </h1>
+        
+        <p data-aos="fade-up" data-aos-delay="200" class="text-slate-400 text-lg md:text-xl max-w-2xl mb-10 leading-relaxed">
+            Inovasi sistem triase cerdas berbasis AI dan IoT menggunakan Raspberry Pi 4. Mendeteksi masker, suhu tubuh, dan SpO2 secara real-time untuk keamanan fasilitas kesehatan.
+        </p>
+        
+        <div data-aos="fade-up" data-aos-delay="300" class="flex flex-col sm:flex-row gap-4">
+            <a href="/dashboard" class="px-8 py-4 bg-white text-slate-900 font-bold rounded-full hover:bg-cyan-50 transition-colors flex items-center justify-center gap-2">
+                <i data-lucide="play-circle" class="w-5 h-5"></i>
+                Lihat Demo Langsung
+            </a>
+            <a href="#about" class="px-8 py-4 bg-slate-800/50 text-white font-medium border border-white/10 rounded-full hover:bg-slate-800 transition-colors flex items-center justify-center">
+                Pelajari Lebih Lanjut
+            </a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 bg-slate-900/30 border-y border-white/5 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-12 items-center">
+            <div data-aos="fade-right">
+                <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-6">Mengapa <span class="text-cyan-400">Smart Triage?</span></h2>
+                <div class="space-y-6 text-slate-400">
+                    <p class="leading-relaxed">
+                        Triase manual konvensional memiliki risiko tinggi penularan penyakit menular dan memakan waktu tenaga medis. Kontak fisik langsung saat pengecekan suhu dan oksigen seringkali tidak terhindarkan.
+                    </p>
+                    <p class="leading-relaxed">
+                        Solusi kami mengintegrasikan <strong class="text-slate-200">Computer Vision</strong> dan <strong class="text-slate-200">Sensor IoT</strong> untuk melakukan skrining awal secara mandiri. Sistem ini secara otomatis memberikan status "DIIZINKAN" atau "DITOLAK" berdasarkan parameter kesehatan vital pengunjung.
+                    </p>
+                    <ul class="space-y-3 mt-4">
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                            <span>Mengurangi kontak fisik (Contactless)</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                            <span>Respon cepat < 2 detik</span>
+                        </li>
+                        <li class="flex items-center gap-3">
+                            <i data-lucide="check-circle" class="w-5 h-5 text-emerald-500"></i>
+                            <span>Akurasi tinggi dengan Sensor Medis</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            <div data-aos="fade-left" class="relative">
+                <!-- Abstract Illustration -->
+                <div class="absolute inset-0 bg-gradient-to-tr from-cyan-500/20 to-indigo-500/20 blur-3xl rounded-full"></div>
+                <div class="relative glass-card p-8 rounded-3xl border border-white/10">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-slate-950/50 p-4 rounded-xl text-center">
+                            <i data-lucide="thermometer" class="w-8 h-8 text-amber-500 mx-auto mb-2"></i>
+                            <div class="text-2xl font-bold text-white">36.5°C</div>
+                            <div class="text-xs text-slate-500">Suhu Normal</div>
+                        </div>
+                        <div class="bg-slate-900/50 p-4 rounded-xl text-center border border-emerald-500/30">
+                            <i data-lucide="shield-check" class="w-8 h-8 text-emerald-500 mx-auto mb-2"></i>
+                            <div class="text-2xl font-bold text-emerald-400">OK</div>
+                            <div class="text-xs text-slate-500">Akses Diterima</div>
+                        </div>
+                        <div class="col-span-2 bg-slate-950/50 p-4 rounded-xl flex items-center gap-4">
+                            <div class="w-12 h-12 bg-slate-800 rounded-lg flex items-center justify-center">
+                                <i data-lucide="scan-face" class="w-6 h-6 text-cyan-400"></i>
+                            </div>
+                            <div>
+                                <div class="text-sm font-bold text-white">AI Face Mask Detection</div>
+                                <div class="text-xs text-slate-500">OpenCV + Haar Cascade</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features -->
+    <section id="features" class="py-20 px-6 max-w-7xl mx-auto relative z-10">
+        <div class="text-center mb-16" data-aos="fade-up">
+            <h2 class="font-display text-3xl md:text-4xl font-bold text-white mb-4">Fitur Utama</h2>
+            <p class="text-slate-400 max-w-xl mx-auto">Sistem terintegrasi yang menggabungkan hardware dan software untuk hasil yang presisi.</p>
+        </div>
+
+        <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Card 1 -->
+            <div data-aos="fade-up" data-aos-delay="0" class="glass-card p-6 rounded-2xl">
+                <div class="w-12 h-12 bg-indigo-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="scan" class="w-6 h-6 text-indigo-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">AI Mask Detection</h3>
+                <p class="text-sm text-slate-400">Mendeteksi penggunaan masker pada wajah menggunakan algoritma Computer Vision secara real-time.</p>
+            </div>
+
+            <!-- Card 2 -->
+            <div data-aos="fade-up" data-aos-delay="100" class="glass-card p-6 rounded-2xl">
+                <div class="w-12 h-12 bg-amber-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="thermometer-sun" class="w-6 h-6 text-amber-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">IR Thermometer</h3>
+                <p class="text-sm text-slate-400">Pengukuran suhu tubuh tanpa kontak menggunakan sensor MLX90614 dengan akurasi medis.</p>
+            </div>
+
+            <!-- Card 3 -->
+            <div data-aos="fade-up" data-aos-delay="200" class="glass-card p-6 rounded-2xl">
+                <div class="w-12 h-12 bg-cyan-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="activity" class="w-6 h-6 text-cyan-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">SpO2 Monitor</h3>
+                <p class="text-sm text-slate-400">Memantau tingkat saturasi oksigen dalam darah menggunakan sensor MAX30102.</p>
+            </div>
+
+            <!-- Card 4 -->
+            <div data-aos="fade-up" data-aos-delay="300" class="glass-card p-6 rounded-2xl">
+                <div class="w-12 h-12 bg-rose-500/20 rounded-xl flex items-center justify-center mb-4">
+                    <i data-lucide="bell-ring" class="w-6 h-6 text-rose-400"></i>
+                </div>
+                <h3 class="text-lg font-bold text-white mb-2">Instant Alert</h3>
+                <p class="text-sm text-slate-400">Notifikasi visual dan suara buzzer otomatis jika parameter kesehatan tidak normal.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Team Section -->
+    <section id="team" class="py-20 bg-slate-900/30 border-y border-white/5 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 text-center">
+            <div data-aos="fade-up" class="mb-16">
+                <span class="text-cyan-500 font-mono text-sm tracking-widest uppercase mb-2 block">Developers</span>
+                <h2 class="font-display text-4xl font-bold text-white">Tim <span class="text-red-500 font-mono">&lt;Error 404/&gt;</span></h2>
+                <p class="text-slate-400 mt-4">Mahasiswa Institut Teknologi Nasional Bandung</p>
+            </div>
+
+            <div class="flex flex-wrap justify-center gap-8 lg:gap-12">
+                <!-- Member 1 -->
+                <div data-aos="zoom-in" data-aos-delay="0" class="group flex flex-col items-center">
+                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl">
+                         <div class="absolute inset-0 bg-slate-800 flex items-center justify-center text-2xl font-bold text-slate-600 group-hover:text-cyan-500 transition-colors">
+                            MR
+                         </div>
+                         <!-- Placeholder Image -->
+                         <img src="https://ui-avatars.com/api/?name=Moch+Riezky&background=0f172a&color=22d3ee" alt="Moch. Riezky" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight w-40">Moch. Riezky<br>Dwi Kuswanto</h3>
+                    <span class="text-xs text-cyan-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                </div>
+
+                <!-- Member 2 -->
+                <div data-aos="zoom-in" data-aos-delay="100" class="group flex flex-col items-center">
+                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl">
+                         <img src="https://ui-avatars.com/api/?name=Robi+Rizki&background=0f172a&color=818cf8" alt="Robi Rizki" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight w-40">Robi Rizki<br>Permana</h3>
+                    <span class="text-xs text-indigo-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                </div>
+
+                <!-- Member 3 -->
+                <div data-aos="zoom-in" data-aos-delay="200" class="group flex flex-col items-center">
+                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl">
+                         <img src="https://ui-avatars.com/api/?name=Dila+Amelisa&background=0f172a&color=f472b6" alt="Dila Amelisa" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight w-40">Dila Amelisa<br>Sapitri</h3>
+                    <span class="text-xs text-pink-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                </div>
+
+                <!-- Member 4 -->
+                <div data-aos="zoom-in" data-aos-delay="300" class="group flex flex-col items-center">
+                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl">
+                         <img src="https://ui-avatars.com/api/?name=Ratu+Syifa&background=0f172a&color=c084fc" alt="Ratu Syifa" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight w-40">Ratu Syifa<br>Nur Felisha</h3>
+                    <span class="text-xs text-purple-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                </div>
+
+                 <!-- Member 5 -->
+                 <div data-aos="zoom-in" data-aos-delay="400" class="group flex flex-col items-center">
+                    <div class="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl">
+                         <img src="https://ui-avatars.com/api/?name=Moch+Sayyid&background=0f172a&color=fbbf24" alt="Mochammad Sayyid" class="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity">
+                    </div>
+                    <h3 class="text-white font-bold text-lg leading-tight w-40">Mochammad<br>Sayyid A.</h3>
+                    <span class="text-xs text-amber-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/5 bg-slate-950 relative z-10">
+        <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-6">
+            <div class="flex items-center gap-2">
+                <i data-lucide="cpu" class="w-5 h-5 text-slate-500"></i>
+                <span class="text-slate-300 font-display font-bold">Smart Triage System</span>
+            </div>
+            
+            <div class="text-slate-500 text-sm text-center md:text-right">
+                <p>&copy; 2025 Tim Error 404.</p>
+                <p>Institut Teknologi Nasional Bandung</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Init Libraries -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100,
+            easing: 'ease-out-cubic'
+        });
+        lucide.createIcons();
+    </script>
+</body>
+</html>

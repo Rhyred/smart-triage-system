@@ -1,0 +1,7 @@
+{
+  "name": "Smart Triage System",
+  "description": "IoT Dashboard for automated health screening",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
