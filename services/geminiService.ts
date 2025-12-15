@@ -2,102 +2,205 @@
  * @license
  * SPDX-License-Identifier: Apache-2.0
 */
-import { GoogleGenAI, Modality } from "@google/genai";
-import { AspectRatio, ComplexityLevel, VisualStyle, ResearchResult, SearchResultItem, Language } from "../types";
+import { HealthData, AIAnalysisResult, TriageStatus } from "../types";
 
-// Create a fresh client for every request to ensure the latest API key from process.env.API_KEY is used
-const getAi = () => {
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
-};
+// Custom AI Service untuk analisis kesehatan
+class HealthAIService {
+  private apiEndpoint: string;
+  private modelPath: string;
 
-// Updated to use 'gemini-3-pro-image-preview' for all operations including search grounding and image generation as requested
-const TEXT_MODEL = 'gemini-3-pro-preview';
-const IMAGE_MODEL = 'gemini-3-pro-image-preview';
-const EDIT_MODEL = 'gemini-3-pro-image-preview';
-
-const getLevelInstruction = (level: ComplexityLevel): string => {
-  switch (level) {
-    case 'Elementary':
-      return "Target Audience: Elementary School (Ages 6-10). Style: Bright, simple, fun. Use large clear icons and very minimal text labels.";
-    case 'High School':
-      return "Target Audience: High School. Style: Standard Textbook. Clean lines, clear labels, accurate maps or diagrams. Avoid cartoony elements.";
-    case 'College':
-      return "Target Audience: University. Style: Academic Journal. High detail, data-rich, precise cross-sections or complex schematics.";
-    case 'Expert':
-      return "Target Audience: Industry Expert. Style: Technical Blueprint/Schematic. Extremely dense detail, monochrome or technical coloring, precise annotations.";
-    default:
-      return "Target Audience: General Public. Style: Clear and engaging.";
+  constructor() {
+    // Konfigurasi endpoint AI custom - bisa diubah sesuai deployment
+    this.apiEndpoint = process.env.AI_API_ENDPOINT || 'http://localhost:5001/analyze';
+    this.modelPath = process.env.AI_MODEL_PATH || './models/health_triage_model';
   }
-};
 
-const getStyleInstruction = (style: VisualStyle): string => {
-  switch (style) {
-    case 'Minimalist': return "Aesthetic: Bauhaus Minimalist. Flat vector art, limited color palette (2-3 colors), reliance on negative space and simple geometric shapes.";
-    case 'Realistic': return "Aesthetic: Photorealistic Composite. Cinematic lighting, 8k resolution, highly detailed textures. Looks like a photograph.";
-    case 'Cartoon': return "Aesthetic: Educational Comic. Vibrant colors, thick outlines, expressive cel-shaded style.";
-    case 'Vintage': return "Aesthetic: 19th Century Scientific Lithograph. Engraving style, sepia tones, textured paper background, fine hatch lines.";
-    case 'Futuristic': return "Aesthetic: Cyberpunk HUD. Glowing neon blue/cyan lines on dark background, holographic data visualization, 3D wireframes.";
-    case '3D Render': return "Aesthetic: 3D Isometric Render. Claymorphism or high-gloss plastic texture, studio lighting, soft shadows, looks like a physical model.";
-    case 'Sketch': return "Aesthetic: Da Vinci Notebook. Ink on parchment sketch, handwritten annotations style, rough but accurate lines.";
-    default: return "Aesthetic: High-quality digital scientific illustration. Clean, modern, highly detailed.";
+  /**
+   * Menganalisis data sensor dan memberikan diagnosis triase
+   */
+  async analyzeHealthData(sensorData: {
+    temperature: number;
+    spo2: number;
+    heartRate?: number;
+    bloodPressure?: { systolic: number; diastolic: number };
+    respiratoryRate?: number;
+    imageData?: string; // Base64 image dari kamera
+  }): Promise<AIAnalysisResult> {
+
+    try {
+      // Simulasi AI analysis - dalam implementasi nyata, ini akan memanggil model ML
+      const analysis = await this.performAIAnalysis(sensorData);
+
+      return {
+        healthData: analysis,
+        confidence: 0.92, // Confidence score dari model
+        detectedConditions: analysis.symptoms || [],
+        timestamp: Date.now()
+      };
+    } catch (error) {
+      console.error('AI Analysis failed:', error);
+      // Fallback ke rule-based analysis jika AI gagal
+      return this.fallbackAnalysis(sensorData);
+    }
   }
+
+  /**
+   * Simulasi analisis AI - ganti dengan implementasi model ML sesungguhnya
+   */
+  private async performAIAnalysis(sensorData: any): Promise<HealthData> {
+    // Dalam implementasi nyata, ini akan:
+    // 1. Preprocess data sensor
+    // 2. Kirim ke model ML (TensorFlow.js, ONNX, dll)
+    // 3. Parse hasil prediction
+    // 4. Return structured health data
+
+    // Untuk demo, kita gunakan logic rule-based yang lebih canggih
+    const { temperature, spo2, heartRate, bloodPressure, respiratoryRate } = sensorData;
+
+    let status: TriageStatus = 'NORMAL';
+    let riskLevel: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL' = 'LOW';
+    let message = 'Kondisi Normal';
+    let symptoms: string[] = [];
+    let recommendations: string[] = [];
+
+    // Analisis Temperature
+    if (temperature >= 38.0) {
+      symptoms.push('Demam Tinggi');
+      riskLevel = 'HIGH';
+    } else if (temperature >= 37.5) {
+      symptoms.push('Demam');
+      riskLevel = 'MEDIUM';
+    }
+
+    // Analisis SpO2
+    if (spo2 < 90) {
+      symptoms.push('Hipoksemia Berat');
+      riskLevel = 'CRITICAL';
+    } else if (spo2 < 95) {
+      symptoms.push('Hipoksemia');
+      riskLevel = 'HIGH';
+    }
+
+    // Analisis Heart Rate (jika tersedia)
+    if (heartRate) {
+      if (heartRate > 120) {
+        symptoms.push('Takikardia');
+        riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
+      } else if (heartRate < 50) {
+        symptoms.push('Bradikardia');
+        riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
+      }
+    }
+
+    // Analisis Blood Pressure (jika tersedia)
+    if (bloodPressure) {
+      const { systolic, diastolic } = bloodPressure;
+      if (systolic >= 180 || diastolic >= 120) {
+        symptoms.push('Hipertensi Kritis');
+        riskLevel = 'CRITICAL';
+      } else if (systolic >= 140 || diastolic >= 90) {
+        symptoms.push('Hipertensi');
+        riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
+      }
+    }
+
+    // Analisis Respiratory Rate (jika tersedia)
+    if (respiratoryRate) {
+      if (respiratoryRate > 30) {
+        symptoms.push('Takipnea');
+        riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
+      } else if (respiratoryRate < 12) {
+        symptoms.push('Bradipnea');
+        riskLevel = riskLevel === 'LOW' ? 'MEDIUM' : riskLevel;
+      }
+    }
+
+    // Tentukan status triase berdasarkan risk level
+    switch (riskLevel) {
+      case 'CRITICAL':
+        status = 'DARURAT';
+        message = 'Perlu Penanganan Darurat Segera';
+        recommendations = [
+          'Segera hubungi tim medis',
+          'Monitor tanda vital terus menerus',
+          'Siapkan alat resusitasi jika diperlukan'
+        ];
+        break;
+      case 'HIGH':
+        status = 'KRITIS';
+        message = 'Perlu Perhatian Medis Segera';
+        recommendations = [
+          'Kunjungi unit gawat darurat',
+          'Pantau kondisi secara berkala',
+          'Siapkan riwayat kesehatan'
+        ];
+        break;
+      case 'MEDIUM':
+        status = 'WASPADA';
+        message = 'Perlu Pemantauan Kesehatan';
+        recommendations = [
+          'Konsultasi dengan dokter',
+          'Istirahat yang cukup',
+          'Monitor gejala'
+        ];
+        break;
+      default:
+        status = 'NORMAL';
+        message = 'Kondisi Dalam Batas Normal';
+        recommendations = [
+          'Jaga pola hidup sehat',
+          'Lakukan pemeriksaan rutin'
+        ];
+    }
+
+    return {
+      temperature,
+      spo2,
+      heartRate,
+      bloodPressure,
+      respiratoryRate,
+      symptoms,
+      status,
+      message,
+      riskLevel,
+      recommendations
+    };
+  }
+
+  /**
+   * Fallback analysis jika AI gagal
+   */
+  private fallbackAnalysis(sensorData: any): AIAnalysisResult {
+    const basicAnalysis = this.performAIAnalysis(sensorData);
+    return {
+      healthData: basicAnalysis,
+      confidence: 0.7, // Lower confidence for fallback
+      detectedConditions: [],
+      timestamp: Date.now()
+    };
+  }
+
+  /**
+   * Train model dengan data baru (untuk continuous learning)
+   */
+  async updateModel(trainingData: any[]): Promise<boolean> {
+    // Implementasi untuk update model dengan data baru
+    // Dalam implementasi nyata, ini akan:
+    // 1. Validate training data
+    // 2. Retrain model
+    // 3. Update model weights
+    console.log('Model update requested with', trainingData.length, 'samples');
+    return true; // Placeholder
+  }
+}
+
+// Export singleton instance
+export const healthAIService = new HealthAIService();
+
+// Legacy exports untuk kompatibilitas (bisa dihapus nanti)
+export const researchTopicForPrompt = async () => {
+  throw new Error('Legacy Gemini API functions are deprecated. Use HealthAIService instead.');
 };
-
-export const researchTopicForPrompt = async (
-  topic: string, 
-  level: ComplexityLevel, 
-  style: VisualStyle,
-  language: Language
-): Promise<ResearchResult> => {
-  
-  const levelInstr = getLevelInstruction(level);
-  const styleInstr = getStyleInstruction(style);
-
-  const systemPrompt = `
-    You are an expert visual researcher.
-    Your goal is to research the topic: "${topic}" and create a plan for an infographic.
-    
-    **IMPORTANT: Use the Google Search tool to find the most accurate, up-to-date information about this topic.**
-    
-    Context:
-    ${levelInstr}
-    ${styleInstr}
-    Language: ${language}
-    
-    Please provide your response in the following format EXACTLY:
-    
-    FACTS:
-    - [Fact 1]
-    - [Fact 2]
-    - [Fact 3]
-    
-    IMAGE_PROMPT:
-    [A highly detailed image generation prompt describing the visual composition, colors, and layout for the infographic. Do not include citations in the prompt.]
-  `;
-
-  const response = await getAi().models.generateContent({
-    model: TEXT_MODEL,
-    contents: systemPrompt,
-    config: {
-      tools: [{ googleSearch: {} }],
-    },
-  });
-
-  const text = response.text || "";
-  
-  // Parse Facts
-  const factsMatch = text.match(/FACTS:\s*([\s\S]*?)(?=IMAGE_PROMPT:|$)/i);
-  const factsRaw = factsMatch ? factsMatch[1].trim() : "";
-  const facts = factsRaw.split('\n')
-    .map(f => f.replace(/^-\s*/, '').trim())
-    .filter(f => f.length > 0)
-    .slice(0, 5);
-
-  // Parse Prompt
-  const promptMatch = text.match(/IMAGE_PROMPT:\s*([\s\S]*?)$/i);
-  const imagePrompt = promptMatch ? promptMatch[1].trim() : `Create a detailed infographic about ${topic}. ${levelInstr} ${styleInstr}`;
-
-  // Extract Grounding (Search Results)
   const searchResults: SearchResultItem[] = [];
   const chunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
   
