@@ -1,7 +1,0 @@
-{
-  "name": "Smart Health Triage System",
-  "description": "AI-powered comprehensive health screening system with custom ML models",
-  "requestFramePermissions": [
-    "camera"
-  ]
-}

@@ -200,9 +200,9 @@ const TriageSystem: React.FC = () => {
                     </button>
                     <div>
                         <h1 className="text-2xl font-bold bg-gradient-to-r from-cyan-400 to-blue-400 bg-clip-text text-transparent">
-                            Smart Health Triage System
+                            Smart    Triage System
                         </h1>
-                        <p className="text-slate-400">AI-Powered Health Assessment</p>
+                        <p className="text-slate-400">IoT with Computer Vision & Ai Analysis</p>
                     </div>
                 </div>
 

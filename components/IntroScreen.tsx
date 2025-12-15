@@ -140,8 +140,6 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
            {/* Connection Nodes around the graphic */}
            {phase >= 2 && particles.map((_, i) => {
              const angle = (i / particles.length) * 360;
-             // Responsive radius calculation done in CSS/JS combo
-             // Using a smaller base radius for mobile in the style calculation
              const isSmall = window.innerWidth < 768;
              const radius = isSmall ? 110 : 140;
              const x = Math.cos(angle * (Math.PI / 180)) * radius;
@@ -156,7 +154,6 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
                         opacity: phase === 3 ? 0.5 : 0 
                     }}
                 >
-                    {/* Connecting lines back to center */}
                     <div 
                         className={`absolute h-[1px] bg-cyan-800/30 origin-right transition-all`}
                         style={{ 
@@ -176,16 +173,15 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
       {/* PHASE 3: UI REVEAL */}
       <div className={`absolute bottom-16 md:bottom-20 flex flex-col items-center transition-all duration-1000 px-6 ${phase === 3 ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
          <h1 className="text-3xl md:text-5xl font-bold text-white mb-2 tracking-tight text-center">
-            InfoGenius <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-amber-400">Vision</span>
+            Smart Triage <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-amber-400">System</span>
          </h1>
          
          <div className="flex flex-col items-center gap-3 mb-8 text-center">
-            <p className="text-slate-400 text-xs md:text-sm uppercase tracking-[0.3em]">Knowledge. Visualized.</p>
+            <p className="text-slate-400 text-xs md:text-sm uppercase tracking-[0.3em]">Tim Error 404 • Sistem Triase Cerdas</p>
             
-            {/* Google Search Grounding Badge */}
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-cyan-950/40 border border-cyan-500/30 backdrop-blur-md animate-in fade-in zoom-in duration-1000 delay-500 shadow-[0_0_15px_rgba(6,182,212,0.2)]">
                 <Globe className="w-3 h-3 text-cyan-400" />
-                <span className="text-[9px] md:text-[10px] font-bold text-cyan-100 uppercase tracking-wider">Now with Google Search Grounding</span>
+                <span className="text-[9px] md:text-[10px] font-bold text-cyan-100 uppercase tracking-wider">Berbasis AI & IoT</span>
             </div>
          </div>
          
@@ -197,13 +193,13 @@ const IntroScreen: React.FC<IntroScreenProps> = ({ onComplete }) => {
             <div className="absolute inset-0 border border-cyan-500/50 rounded-full group-hover:border-cyan-400 transition-colors"></div>
             
             <div className="relative flex items-center gap-3">
-                <span className="text-cyan-300 group-hover:text-white font-bold tracking-widest text-sm transition-colors">INITIALIZE SYSTEM</span>
+                <span className="text-cyan-300 group-hover:text-white font-bold tracking-widest text-sm transition-colors">LANJUTKAN KE LANDING</span>
                 <Play className="w-4 h-4 text-cyan-300 group-hover:text-white fill-current transition-colors" />
             </div>
          </button>
       </div>
 
-      {/* Skip Button (Visible always for UX) */}
+      {/* Skip Button */}
       <button 
         onClick={onComplete}
         className="absolute top-6 right-6 md:top-8 md:right-8 text-[10px] md:text-xs text-slate-600 hover:text-white transition-colors uppercase tracking-widest border border-transparent hover:border-white/10 px-3 py-1 rounded-full"
