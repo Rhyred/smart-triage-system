@@ -4,7 +4,7 @@
 
 # Smart Health Triage System
 
-Sistem triase kesehatan cerdas pakai AI — skrining cepat tanpa kontak. Cocok untuk demo kampus atau prototipe fasilitas kesehatan.
+Sistem deteksi kesehatan cerdas pakai AI — skrining cepat tanpa kontak. Cocok penelitian atau prototipe fasilitas kesehatan.
 
 ## ✨ Fitur Utama
 
