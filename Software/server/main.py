@@ -3,7 +3,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 from typing import Optional, List, Dict, Any
 from enum import Enum
-from yolo_inference import YOLOHealthAnalyzer
+from yolo_inference import analyze_health_image
+from sensor_service import get_sensor_data
 import base64
 import cv2
 import numpy as np
@@ -11,7 +12,6 @@ import time
 
 # Import YOLO analyzer
 try:
-    from yolo_inference import analyze_health_image
     import cv2
     import numpy as np
     YOLO_AVAILABLE = True
@@ -30,7 +30,7 @@ app = FastAPI(title="Health AI Local Server")
 # Add CORS Middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Mengizinkan semua origin untuk development
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -57,8 +57,8 @@ class BloodPressure(BaseModel):
 
 
 class AnalyzeRequest(BaseModel):
-    temperature: float
-    spo2: int
+    temperature: Optional[float] = None
+    spo2: Optional[int] = None
     heartRate: Optional[int] = None
     bloodPressure: Optional[BloodPressure] = None
     respiratoryRate: Optional[int] = None
@@ -80,46 +80,61 @@ def root():
 @app.post("/analyze", response_model=AnalyzeResponse)
 def analyze(req: AnalyzeRequest):
     """
-    Analisis kesehatan komprehensif menggunakan sensor data + YOLO vision analysis
+    Analisis kesehatan REAL-TIME. 
+    WAJIB HARDWARE: Jika sensor gagal, kembalikan error.
     """
     start_time = time.time()
+
+    try:
+        # === AMBIL DATA DARI SENSOR HARDWARE (WAJIB) ===
+        print("📡 Reading real-time sensor data from GPIO...")
+        sensor_reading = get_sensor_data()
+    except RuntimeError as e:
+        # Jika sensor mati, hentikan proses dan lapor ke user
+        print(f"❌ HARDWARE ERROR: {str(e)}")
+        from fastapi import HTTPException
+        raise HTTPException(status_code=503, detail=f"Hardware Sensor Error: {str(e)}")
+
+    current_temp = sensor_reading['temperature']
+    current_spo2 = sensor_reading['spo2']
+    current_heart_rate = sensor_reading['heartRate']
+    current_bp = sensor_reading['bloodPressure']
+    current_rr = sensor_reading['respiratoryRate']
 
     # === ANALISIS SENSOR DATA ===
     sensor_symptoms: List[str] = []
     sensor_risk = RiskLevel.LOW
 
-    # Temperature analysis
-    if req.temperature >= 38.0:
+    # Logika analisis tetap sama, tapi menggunakan data REAL
+    if current_temp >= 38.0:
         sensor_symptoms.append("Demam Tinggi")
         sensor_risk = RiskLevel.HIGH
-    elif req.temperature >= 37.5:
+    elif current_temp >= 37.5:
         sensor_symptoms.append("Demam")
         sensor_risk = RiskLevel.MEDIUM
 
-    # SpO2 analysis
-    if req.spo2 < 90:
+    if current_spo2 < 90:
         sensor_symptoms.append("Hipoksemia Berat")
         sensor_risk = RiskLevel.CRITICAL
-    elif req.spo2 < 95:
+    elif current_spo2 < 95:
         sensor_symptoms.append("Hipoksemia")
-        if sensor_risk == RiskLevel.LOW:
-            sensor_risk = RiskLevel.HIGH
+        sensor_risk = RiskLevel.HIGH
 
     # Heart Rate analysis
-    if req.heartRate:
-        if req.heartRate > 120:
+    if current_heart_rate:
+        if current_heart_rate > 120:
             sensor_symptoms.append("Takikardia")
             if sensor_risk == RiskLevel.LOW:
                 sensor_risk = RiskLevel.MEDIUM
-        elif req.heartRate < 50:
+        elif current_heart_rate < 50:
             sensor_symptoms.append("Bradikardia")
             if sensor_risk == RiskLevel.LOW:
                 sensor_risk = RiskLevel.MEDIUM
 
     # Blood Pressure analysis
-    if req.bloodPressure:
-        systolic = req.bloodPressure.systolic
-        diastolic = req.bloodPressure.diastolic
+    if current_bp:
+        systolic = current_bp.get('systolic', 120)
+        diastolic = current_bp.get('diastolic', 80)
         if systolic >= 180 or diastolic >= 120:
             sensor_symptoms.append("Hipertensi Kritis")
             sensor_risk = RiskLevel.CRITICAL
@@ -128,26 +143,13 @@ def analyze(req: AnalyzeRequest):
             if sensor_risk == RiskLevel.LOW:
                 sensor_risk = RiskLevel.MEDIUM
 
-    # Respiratory Rate analysis
-    if req.respiratoryRate:
-        if req.respiratoryRate > 30:
-            sensor_symptoms.append("Takipnea")
-            if sensor_risk == RiskLevel.LOW:
-                sensor_risk = RiskLevel.MEDIUM
-        elif req.respiratoryRate < 12:
-            sensor_symptoms.append("Bradipnea")
-            if sensor_risk == RiskLevel.LOW:
-                sensor_risk = RiskLevel.MEDIUM
-
-    # === ANALISIS VISUAL DENGAN YOLO (jika tersedia) ===
+    # === ANALISIS VISUAL DENGAN YOLO ===
     vision_analysis = None
     if req.imageData and YOLO_AVAILABLE:
         try:
             vision_analysis = analyze_health_image(req.imageData)
-            print(f"✅ YOLO analysis completed in {time.time() - start_time:.2f}s")
         except Exception as e:
             print(f"⚠️  YOLO analysis failed: {e}")
-            vision_analysis = None
 
     # === GABUNGKAN ANALISIS SENSOR + VISUAL ===
     combined_symptoms = sensor_symptoms.copy()
@@ -156,12 +158,9 @@ def analyze(req: AnalyzeRequest):
 
     if vision_analysis and vision_analysis['overall_analysis']:
         vision_data = vision_analysis['overall_analysis']
-
-        # Gabungkan symptoms
         vision_symptoms = vision_data.get('symptoms', [])
         combined_symptoms.extend(vision_symptoms)
 
-        # Update risk level jika vision menunjukkan risiko lebih tinggi
         vision_risk_level = vision_data.get('risk_level', 'LOW')
         risk_hierarchy = {'LOW': 1, 'MEDIUM': 2, 'HIGH': 3, 'CRITICAL': 4}
         current_risk_value = risk_hierarchy.get(combined_risk.value, 1)
@@ -170,12 +169,10 @@ def analyze(req: AnalyzeRequest):
         if vision_risk_value > current_risk_value:
             combined_risk = RiskLevel(vision_risk_level)
 
-        # Tambahkan insights dari vision
         detected_conditions = vision_data.get('detected_conditions', [])
         if detected_conditions:
             vision_insights.append(f"Visual analysis mendeteksi: {', '.join(detected_conditions)}")
 
-    # Remove duplicate symptoms
     combined_symptoms = list(set(combined_symptoms))
 
     # === TENTUKAN STATUS AKHIR ===
@@ -208,38 +205,37 @@ def analyze(req: AnalyzeRequest):
             "Monitor gejala"
         ]
 
-    # Tambahkan rekomendasi dari vision analysis jika ada
     if vision_analysis and vision_analysis['overall_analysis']:
         vision_recs = vision_analysis['overall_analysis'].get('recommendations', [])
         recommendations.extend(vision_recs)
-        recommendations = list(set(recommendations))  # Remove duplicates
+        recommendations = list(set(recommendations))
 
     # === BUAT RESPONSE ===
     health_data = {
-        "temperature": req.temperature,
-        "spo2": req.spo2,
-        "heartRate": req.heartRate,
-        "bloodPressure": req.bloodPressure.dict() if req.bloodPressure else None,
-        "respiratoryRate": req.respiratoryRate,
+        "temperature": current_temp,
+        "spo2": current_spo2,
+        "heartRate": current_heart_rate,
+        "bloodPressure": current_bp,
+        "respiratoryRate": current_rr,
         "symptoms": combined_symptoms,
         "status": status.value,
         "message": message,
         "riskLevel": combined_risk.value,
         "recommendations": recommendations,
         "vision_insights": vision_insights,
-        "analysis_method": "sensor + vision" if vision_analysis else "sensor only"
+        "is_simulated": sensor_reading.get('is_simulated', False),
+        "analysis_method": "sensor hardware + vision" if vision_analysis else "sensor hardware only"
     }
 
-    # Hitung confidence berdasarkan data yang tersedia
-    confidence = 0.7  # Base confidence
+    confidence = 0.8  # Base confidence lebih tinggi karena pakai hardware real
     if vision_analysis:
-        confidence += 0.2  # Bonus untuk visual analysis
-    if req.heartRate and req.bloodPressure and req.respiratoryRate:
-        confidence += 0.1  # Bonus untuk data sensor lengkap
+        confidence += 0.1
+    
+    print(f"✅ Analysis complete , {time.time() - start_time:.2f}s")
 
     return AnalyzeResponse(
         healthData=health_data,
-        confidence=min(confidence, 0.95),  # Max 95% confidence
+        confidence=min(confidence, 0.95),
         detectedConditions=combined_symptoms,
         timestamp=int(time.time() * 1000)
     )

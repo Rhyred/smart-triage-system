@@ -83,12 +83,34 @@ class YOLOHealthAnalyzer:
             return self._fallback_analysis()
 
         try:
-            # Decode base64 image
-            image_bytes = base64.b64decode(image_data.split(',')[1] if ',' in image_data else image_data)
+            # 1. Bersihkan string base64
+            if ',' in image_data:
+                header, encoded = image_data.split(',', 1)
+            else:
+                encoded = image_data
+
+            # 2. Tambahkan padding jika kurang (fix common base64 error)
+            encoded += "=" * ((4 - len(encoded) % 4) % 4)
+
+            # 3. Decode
+            image_bytes = base64.b64decode(encoded)
+            
+            # 4. Validasi byte gambar
+            if len(image_bytes) == 0:
+                print("❌ Error: Decoded image bytes is empty")
+                return self._fallback_analysis()
+
+            # 5. Buka dengan PIL
             image = Image.open(io.BytesIO(image_bytes))
+            
+            # Konversi ke RGB jika perlu (misal gambar RGBA)
+            if image.mode != 'RGB':
+                image = image.convert('RGB')
+                
             image_np = np.array(image)
 
             # Run YOLO inference
+            print(f"📸 Running inference on image size: {image.size}")
             results = self.model(image_np, conf=0.3, iou=0.5)
 
             # Process results
