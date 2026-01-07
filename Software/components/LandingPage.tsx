@@ -63,6 +63,21 @@ const LandingPage: React.FC = () => {
     };
   }, []);
 
+  type Member = {
+    name: string;
+    initials: string;
+    photo: string;
+    role: string;
+  };
+
+  const teamMembers: Member[] = [
+    { name: 'Moch. Riezky Dwi Kuswanto', initials: 'MR', photo: 'public/riezky.jpg', role: 'AI/ML' },
+    { name: 'Robi Rizki Permana', initials: 'RR', photo: '/public/rr.jpg', role: 'Team Manager Developers' },
+    { name: 'Dila Amelisa Sapitri', initials: 'DA', photo: '/public/da.jpg', role: 'Backend' },
+    { name: 'Ratu Syifa Nur Felisha', initials: 'RS', photo: '/public/rs.jpg', role: 'Frontend' },
+    { name: 'Mochammad Sayyid A.', initials: 'MS', photo: '/public//ms.jpg', role: 'IoT Specialist' },
+  ];
+
   const handleDemo = () => {
     navigate('/triage');
   };
@@ -247,29 +262,33 @@ const LandingPage: React.FC = () => {
             <h2 className="font-display text-4xl font-bold text-white">
               Tim <span className="text-red-500 font-mono">&lt;Error 404/&gt;</span>
             </h2>
-            <p className="text-slate-400 mt-4">Mahasiswa Institut Teknologi Nasional Bandung</p>
+            <p className="text-slate-400 mt-4">Institut Teknologi Nasional Bandung</p>
           </div>
 
           <div className="flex flex-wrap justify-center gap-8 lg:gap-12">
-            {[
-              { name: 'Moch. Riezky Dwi Kuswanto', initials: 'MR' },
-              { name: 'Robi Rizki Permana', initials: 'RR' },
-              { name: 'Dila Amelisa Sapitri', initials: 'DA' },
-              { name: 'Ratu Syifa Nur Felisha', initials: 'RS' },
-              { name: 'Mochammad Sayyid A.', initials: 'MS' },
-            ].map((member, idx) => (
+            {teamMembers.map((member, idx) => (
               <div key={idx} data-aos="zoom-in" data-aos-delay={idx * 100} className="group flex flex-col items-center">
                 <div className="w-24 h-24 md:w-32 md:h-32 rounded-full border-2 border-slate-700 group-hover:border-cyan-500 transition-colors overflow-hidden mb-4 relative shadow-xl bg-slate-800">
-                  <img 
-                    src={`https://ui-avatars.com/api/?name=${member.initials}&background=0f172a&color=22d3ee`}
-                    alt={member.name}
-                    className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
-                  />
+<img
+  src={member.photo}
+  alt={member.name}
+  loading="lazy"
+  onError={(e) => {
+    const img = e.currentTarget as HTMLImageElement;
+    if (!img.dataset.fallback) {
+      img.dataset.fallback = 'true';
+      img.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(
+        member.initials
+      )}&background=0f172a&color=22d3ee`;
+    }
+  }}
+  className="w-full h-full object-cover opacity-90 group-hover:opacity-100 transition-opacity"
+/>
                 </div>
                 <h3 className="text-white font-bold text-lg leading-tight w-40">
                   {member.name}
                 </h3>
-                <span className="text-xs text-cyan-500 uppercase tracking-wider mt-1 font-medium">Anggota</span>
+                <span className="text-xs text-cyan-500 uppercase tracking-wider mt-1 font-medium">{member.role}</span>
               </div>
             ))}
           </div>

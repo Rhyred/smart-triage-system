@@ -235,7 +235,7 @@ const TriageSystem: React.FC = () => {
                                 autoPlay
                                 playsInline
                                 muted
-                                className="w-full h-64 bg-slate-900 rounded-lg object-cover"
+                                className="w-full h-[500px] bg-slate-900 rounded-lg object-cover"
                             />
                             <canvas ref={canvasRef} className="hidden" />
                         </div>
