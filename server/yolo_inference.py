@@ -26,40 +26,56 @@ class YOLOHealthAnalyzer:
     def __init__(self, model_path: str = "models/health_triage_yolo.pt"):
         """
         Initialize YOLO analyzer
-
+        
         Args:
             model_path: Path ke model YOLO yang sudah dilatih
         """
         self.model_path = Path(model_path)
         self.model = None
-        self.class_names = {
+        self.using_standard_model = False
+        
+        # Mapping kelas untuk model medis custom
+        self.custom_class_names = {
             0: 'normal_posture',
-            1: 'abnormal_posture',
+            1: 'abnormal_posture', 
             2: 'fatigue_signs',
             3: 'distress_signs',
             4: 'pain_expression',
             5: 'breathing_difficulty'
         }
+        
+        # Mapping untuk model standar (COCO) sebagai fallback demo
+        self.coco_class_names = {
+            0: 'person'
+        }
 
-        # Load model jika tersedia
-        if self.model_path.exists() and YOLO_AVAILABLE:
+        if YOLO_AVAILABLE:
             try:
-                self.model = YOLO(str(self.model_path))
-                print(f"✅ Model YOLO dimuat: {model_path}")
+                if self.model_path.exists():
+                    self.model = YOLO(str(self.model_path))
+                    print(f"✅ Model Medis Custom dimuat: {model_path}")
+                    self.using_standard_model = False
+                else:
+                    # Fallback ke model standar YOLOv8n
+                    print(f"⚠️  Model medis tidak ditemukan di {model_path}")
+                    print("   🔄 Mengunduh/Memuat model standar YOLOv8n untuk demonstrasi...")
+                    self.model = YOLO("yolov8n.pt") 
+                    self.using_standard_model = True
+                    print("✅ Model Standar (yolov8n) siap digunakan")
+                    
             except Exception as e:
                 print(f"❌ Gagal load model: {e}")
                 self.model = None
         else:
-            print(f"⚠️  Model tidak ditemukan: {model_path}")
-            print("   Menggunakan fallback analysis")
+            print("⚠️  Ultralytics library tidak tersedia")
 
     def analyze_image(self, image_data: str) -> Dict[str, Any]:
         """
         Analisis gambar menggunakan YOLOv11
-
+        
         Args:
             image_data: Base64 encoded image string
-
+            
         Returns:
             Dictionary berisi hasil analisis kesehatan
         """
@@ -87,7 +103,16 @@ class YOLOHealthAnalyzer:
                         x1, y1, x2, y2 = box.xyxy[0].cpu().numpy()
                         confidence = float(box.conf[0].cpu().numpy())
                         class_id = int(box.cls[0].cpu().numpy())
-                        class_name = self.class_names.get(class_id, f"class_{class_id}")
+                        
+                        # Tentukan nama kelas berdasarkan model yang dipakai
+                        if self.using_standard_model:
+                            # Jika model standar, kita hanya peduli 'person'
+                            if class_id == 0: 
+                                class_name = 'person_detected'
+                            else:
+                                continue # Skip objek lain (kursi, meja, dll)
+                        else:
+                            class_name = self.custom_class_names.get(class_id, f"class_{class_id}")
 
                         detection = {
                             'class': class_name,
@@ -103,12 +128,15 @@ class YOLOHealthAnalyzer:
 
             # Aggregate health analysis
             health_analysis = self._aggregate_health_analysis(health_conditions)
+            
+            # Tambahkan metadata
+            health_analysis['model_type'] = 'Standard/Demo' if self.using_standard_model else 'Medical/Custom'
 
             return {
                 'detections': detections,
                 'health_conditions': health_conditions,
                 'overall_analysis': health_analysis,
-                'model_used': 'YOLOv11',
+                'model_used': 'YOLOv8n' if self.using_standard_model else 'CustomYOLO',
                 'confidence': 0.85
             }
 
@@ -118,6 +146,15 @@ class YOLOHealthAnalyzer:
 
     def _map_detection_to_health(self, class_name: str, confidence: float) -> Optional[Dict[str, Any]]:
         """Map deteksi YOLO ke kondisi kesehatan"""
+        
+        # Mapping Khusus untuk Demo dengan Model Standar
+        if class_name == 'person_detected':
+            return {
+                'condition': 'Pasien Terdeteksi',
+                'severity': 'LOW',
+                'symptoms': ['Kehadiran pasien terkonfirmasi'],
+                'recommendations': ['Lanjutkan pemeriksaan visual', 'Cek tanda vital']
+            }
 
         health_mapping = {
             'normal_posture': {
